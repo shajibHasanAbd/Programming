@@ -1,0 +1,21 @@
+#include <stdio.h>
+int main(){
+
+    char choice;
+    float num1,num2, ans = 0;
+    printf("Enter two number: ");
+    scanf("%f %f", &num1,&num2);
+    //printf("%f %f", num1,num2);
+
+    printf("\nEnter Operation: ");
+    scanf(" %c",&choice);
+
+    if(choice == '+') ans = num1 + num2;
+    else if(choice == '-') ans = num1 - num2;
+    else if(choice == '*') ans = num1 * num2;
+    else if(choice == '/') ans = num1 / num2;
+    else{
+        printf("Invalid operation");
+        return 0;
+    }
+    printf("%f / %f = %.2f\n", num1,num2,ans);
