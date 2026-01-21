@@ -1,0 +1,16 @@
+#include <stdio.h>
+int main(){
+    long long num;
+    int count=0;
+
+    printf("enter the number: ",num);
+    scanf("%lld", &num);
+    do{
+        num/=10;
+        ++count;
+    }
+
+    while (num!= 0);
+    printf("mumber of digit:%d",count);
+    return 0;
+}
