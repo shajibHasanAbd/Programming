@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Smart App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap');
+        body { font-family: 'Hind Siliguri', sans-serif; transition: all 0.3s; }
+        .hidden { display: none; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <section id="login-section" class="flex flex-col items-center justify-center p-6 min-h-screen">
+        <div class="bg-white p-8 rounded-[2.5rem] card-shadow w-full max-w-sm text-center">
+            <h1 class="text-2xl font-bold mb-6 text-blue-600">ছাত্র লগইন</h1>
+            
+            <div id="login-form" class="space-y-3">
+                <input id="login-name" type="text" placeholder="পুরো নাম লিখুন" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none focus:border-blue-500">
+                
+                <select id="login-dept" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none text-gray-600">
+                    <option value="">ডিপার্টমেন্ট নির্বাচন করুন</option>
+                    <option value="Computer">Computer</option>
+                    <option value="Electrical">Electrical</option>
+                    <option value="Civil">Civil</option>
+                    <option value="Mechanical">Mechanical</option>
+                    <option value="Electronics">Electronics</option>
+                </select>
+
+                <input id="login-roll" type="number" placeholder="বোর্ড রোল নম্বর" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none focus:border-blue-500">
+                
+                <input id="login-phone" type="tel" placeholder="ফোন নম্বর" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none focus:border-blue-500">
+                
+                <button onclick="studentLogin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-2 shadow-lg active:scale-95 transition">লগইন করুন</button>
+            </div>
+            
+            <button onclick="showAdminLogin()" class="mt-8 text-gray-300 text-[10px] uppercase tracking-widest">Admin Access</button>
+        </div>
+    </section>
+
+    <section id="home-page" class="hidden min-h-screen pb-20">
+        <div class="bg-blue-600 p-6 pt-10 text-white rounded-b-[3rem] shadow-lg flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div id="home-profile-img"></div>
+                <div>
+                    <h2 id="display-name" class="text-lg font-bold">লোড হচ্ছে...</h2>
+                    <p class="text-[10px] opacity-90"><span id="display-dept">বিভাগ</span> | রোল: <span id="display-roll">000000</span></p>
+                </div>
+            </div>
+            <button onclick="showSection('profile-view')" class="bg-white/20 p-3 rounded-2xl"><i class="fas fa-user-circle"></i></button>
+        </div>
+
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-gray-700">নোটিশ বোর্ড</h3>
+                <i class="fas fa-bullhorn text-blue-500"></i>
+            </div>
+            <div id="notice-list" class="space-y-4"></div>
+        </div>
+    </section>
+
+    <section id="profile-view" class="hidden p-6 min-h-screen">
+        <button onclick="showSection('home-page')" class="mb-6 text-gray-500 flex items-center gap-2"><i class="fas fa-arrow-left"></i> ফিরে যান</button>
+        <div class="bg-white p-8 rounded-[3rem] card-shadow text-center border border-gray-100">
+            <div class="relative w-28 h-28 mx-auto mb-6">
+                <div id="profile-pic-container"></div>
+                <label for="img-upload" class="absolute bottom-1 right-1 bg-blue-600 text-white w-9 h-9 rounded-full flex items-center justify-center border-4 border-white cursor-pointer shadow-lg">
+                    <i class="fas fa-camera text-xs"></i>
+                </label>
+                <input type="file" id="img-upload" class="hidden" onchange="handleImageUpload(event)">
+            </div>
+            <h2 id="p-name" class="text-xl font-bold text-gray-800">--</h2>
+            <p id="p-info" class="text-sm text-gray-500 mb-8 font-semibold">--</p>
+            
+            <div class="h-[1px] bg-gray-100 w-full mb-6"></div>
+            
+            <button onclick="logout()" class="text-red-500 font-bold flex items-center justify-center gap-2 mx-auto"><i class="fas fa-sign-out-alt"></i> লগ আউট</button>
+        </div>
+    </section>
+
+    <section id="admin-dashboard" class="hidden p-6 min-h-screen bg-gray-50">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="font-bold text-lg">অ্যাডমিন প্যানেল</h2>
+            <button onclick="location.reload()" class="bg-red-100 text-red-600 px-4 py-2 rounded-xl font-bold text-sm">বন্ধ করুন</button>
+        </div>
+        <div class="bg-white p-5 rounded-3xl mb-6 shadow-sm border border-gray-200">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">নতুন নোটিশ লিখুন</label>
+            <textarea id="adm-notice" placeholder="এখানে বিস্তারিত লিখুন..." class="w-full p-4 bg-gray-50 border rounded-2xl mb-3 h-32 outline-none focus:border-blue-500"></textarea>
+            <button onclick="postNotice()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-blue-200 shadow-lg">পোস্ট করুন</button>
+        </div>
+    </section>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAamqx3JwL4Wl5UD_CdiFxZsrW4PAp-y9U",
+            authDomain: "my-app-e73cd.firebaseapp.com",
+            projectId: "my-app-e73cd",
+            storageBucket: "my-app-e73cd.firebasestorage.app",
+            messagingSenderId: "966942423461",
+            appId: "1:966942423461:web:42d31452b72133c34cd04c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- লগইন ফাংশন ---
+        window.studentLogin = async function() {
+            const name = document.getElementById('login-name').value.trim();
+            const dept = document.getElementById('login-dept').value;
+            const roll = document.getElementById('login-roll').value.trim();
+            const phone = document.getElementById('login-phone').value.trim();
+
+            if (!name || !dept || !roll || !phone) {
+                alert("দয়া করে সবগুলো ঘর পূরণ করুন!");
+                return;
+            }
+
+            try {
+                const userRef = doc(db, "users", phone);
+                await setDoc(userRef, {
+                    name: name,
+                    dept: dept,
+                    roll: roll,
+                    phone: phone,
+                    timestamp: Date.now()
+                }, { merge: true });
+
+                localStorage.setItem('userPhone', phone);
+                loadHome(phone);
+            } catch (error) {
+                alert("ডাটাবেস কানেকশনে সমস্যা হচ্ছে। Rules চেক করুন।");
+            }
+        };
+
+        // --- ইমেজ আপলোড ---
+        window.handleImageUpload = async function(e) {
+            const file = e.target.files[0];
+            const phone = localStorage.getItem('userPhone');
+            if(!file || !phone) return;
+
+            try {
+                const fileRef = ref(storage, `profiles/${phone}`);
+                await uploadBytes(fileRef, file);
+                const url = await getDownloadURL(fileRef);
+                await setDoc(doc(db, "users", phone), { photo: url }, { merge: true });
+                renderProfile(url);
+            } catch (err) {
+                alert("ছবি আপলোড ব্যর্থ হয়েছে!");
+            }
+        };
+
+        // --- তথ্য লোড করা ---
+        async function loadHome(phone) {
+            const userSnap = await getDoc(doc(db, "users", phone));
+            if(userSnap.exists()){
+                const d = userSnap.data();
+                document.getElementById('display-name').innerText = d.name;
+                document.getElementById('display-dept').innerText = d.dept;
+                document.getElementById('display-roll').innerText = d.roll;
+                document.getElementById('p-name').innerText = d.name;
+                document.getElementById('p-info').innerText = `${d.dept} বিভাগ | রোল: ${d.roll}`;
+                renderProfile(d.photo);
+            }
+            showSection('home-page');
+        }
+
+        function renderProfile(url) {
+            const html = url ? `<img src="${url}" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md">` : `<div class="w-28 h-28 bg-blue-50 text-blue-300 rounded-full flex items-center justify-center text-4xl border-4 border-white shadow-inner"><i class="fas fa-user"></i></div>`;
+            document.getElementById('profile-pic-container').innerHTML = html;
+            document.getElementById('home-profile-img').innerHTML = url ? `<img src="${url}" class="w-11 h-11 rounded-xl object-cover border border-white/50">` : `<div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center"><i class="fas fa-user text-sm"></i></div>`;
+        }
+
+        // --- রিয়েল-টাইম নোটিশ ---
+        const q = query(collection(db, "notices"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const list = document.getElementById('notice-list');
+            list.innerHTML = "";
+            snapshot.forEach(doc => {
+                const n = doc.data();
+                list.innerHTML += `<div class="bg-white p-5 rounded-3xl card-shadow border-l-4 border-blue-600 animate-fade-in">
+                    <p class="font-semibold text-gray-800 mb-2 leading-relaxed">${n.text}</p>
+                    <div class="flex items-center gap-2 text-[10px] text-gray-400 font-bold">
+                        <i class="far fa-clock"></i>
+                        <span>${n.date}</span>
+                    </div>
+                </div>`;
+            });
+        });
+
+        // --- অ্যাডমিন নোটিশ পোস্ট ---
+        window.postNotice = async function() {
+            const t = document.getElementById('adm-notice').value.trim();
+            if(!t) return;
+            try {
+                await addDoc(collection(db, "notices"), {
+                    text: t,
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleDateString('bn-BD', {day:'2-digit', month:'long', year:'numeric'})
+                });
+                document.getElementById('adm-notice').value = "";
+                alert("সফলভাবে পোস্ট করা হয়েছে!");
+            } catch (e) {
+                alert("অ্যাডমিন পারমিশন নেই!");
+            }
+        };
+
+        window.logout = () => { localStorage.removeItem('userPhone'); location.reload(); };
+
+        // সেশন চেক
+        const savedPhone = localStorage.getItem('userPhone');
+        if(savedPhone) loadHome(savedPhone);
+        else showSection('login-section');
+    </script>
+
+    <script>
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function showAdminLogin() {
+            const pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
+            if(pass === "@@cst dpi @@#2345") showSection('admin-dashboard');
+            else if(pass) alert("ভুল পাসওয়ার্ড!");
+        }
+    </script>
+</body>
+</html>
