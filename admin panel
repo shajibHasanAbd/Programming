@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart App with Admin & Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap');
+        body { font-family: 'Hind Siliguri', sans-serif; transition: all 0.3s; }
+        .hidden { display: none; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        ::-webkit-scrollbar { display: none; }
+        .animate-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <section id="login-section" class="flex flex-col items-center justify-center p-6 min-h-screen">
+        <div class="bg-white p-8 rounded-[2.5rem] card-shadow w-full max-w-sm text-center">
+            <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600 text-3xl">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h1 class="text-2xl font-bold mb-6 text-gray-800">লগইন</h1>
+            <input id="login-phone" type="tel" placeholder="017XXXXXXXX" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 active:scale-95 transition">প্রবেশ করুন</button>
+            <button onclick="showAdminLogin()" class="mt-6 text-gray-400 text-xs uppercase tracking-widest hover:text-blue-500 transition">Admin Access</button>
+        </div>
+    </section>
+
+    <section id="home-page" class="hidden min-h-screen pb-20">
+        <div class="bg-blue-600 p-6 pt-10 text-white rounded-b-[2.5rem] shadow-lg flex justify-between items-center relative overflow-hidden">
+            <div class="relative z-10">
+                <p class="text-xs opacity-70">হ্যালো 👋</p>
+                <h2 id="display-name" class="text-xl font-bold italic">User</h2>
+            </div>
+            <button onclick="showSection('profile-view')" class="bg-white/20 p-3 rounded-2xl relative z-10 hover:bg-white/30 transition">
+                <i class="fas fa-user"></i>
+            </button>
+            <div class="absolute -right-5 -bottom-5 w-24 h-24 bg-blue-500 rounded-full opacity-50"></div>
+        </div>
+
+        <div class="p-6">
+            <h3 class="font-bold mb-3 text-gray-800">সাম্প্রতিক নোটিশ 📢</h3>
+            <div id="notice-list" class="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
+                </div>
+        </div>
+
+        <div class="px-6 mb-6">
+            <div class="relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="book-search" onkeyup="searchBooks()" placeholder="বইয়ের নাম লিখে সার্চ করুন..." 
+                       class="w-full pl-12 pr-4 py-4 bg-white rounded-2xl card-shadow outline-none border-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+        </div>
+
+        <div class="px-6">
+            <h3 class="font-bold mb-4 text-gray-800">বইসমূহ 📚</h3>
+            <div id="book-grid" class="grid grid-cols-2 gap-4">
+                </div>
+        </div>
+    </section>
+
+    <section id="admin-login" class="hidden flex flex-col items-center justify-center p-6 min-h-screen">
+        <div class="bg-slate-800 p-8 rounded-[2rem] w-full max-w-sm text-white shadow-2xl">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-lock text-orange-400"></i> Admin Security
+            </h2>
+            <input id="admin-pass" type="password" placeholder="অ্যাডমিন পাসওয়ার্ড" class="w-full p-4 bg-slate-700 rounded-xl mb-4 outline-none border border-slate-600 focus:border-orange-500">
+            <button onclick="checkAdmin()" class="w-full bg-orange-500 py-4 rounded-xl font-bold hover:bg-orange-600 transition shadow-lg shadow-orange-900/20">Dashboard-এ যান</button>
+            <button onclick="showSection('login-section')" class="w-full mt-4 text-sm text-slate-400 hover:underline">ফিরে যান</button>
+        </div>
+    </section>
+
+    <section id="admin-dashboard" class="hidden p-6 min-h-screen pb-10">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-slate-800">অ্যাডমিন কন্ট্রোল ⚙️</h2>
+            <button onclick="location.reload()" class="bg-red-50 text-red-500 px-4 py-2 rounded-xl font-bold text-sm">Logout</button>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl card-shadow mb-8 border border-blue-50">
+            <h3 class="font-bold mb-4 text-blue-600">নতুন নোটিশ যোগ করুন</h3>
+            <input id="new-notice-text" type="text" placeholder="নোটিশের বিষয়..." class="w-full p-4 bg-gray-50 border rounded-xl mb-3 outline-none focus:border-blue-500">
+            <button onclick="addNotice()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-md">Add Notice</button>
+        </div>
+
+        <h3 class="font-bold mb-4 text-gray-800">সব নোটিশ ম্যানেজ করুন</h3>
+        <div id="admin-notice-manager" class="space-y-3">
+            </div>
+    </section>
+
+    <section id="profile-view" class="hidden p-6 text-center animate-in">
+        <button onclick="showSection('home-page')" class="mb-6 bg-gray-100 p-3 rounded-2xl hover:bg-gray-200 transition">
+            <i class="fas fa-arrow-left"></i> ফিরে যান
+        </button>
+        <div class="bg-white p-8 rounded-[2.5rem] card-shadow">
+            <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center text-blue-600 text-3xl font-bold border-4 border-white shadow-md" id="profile-initial">?</div>
+            <h2 id="p-name" class="text-2xl font-bold text-gray-800">--</h2>
+            <p id="p-phone" class="text-blue-500 font-semibold mb-8 text-sm">--</p>
+            
+            <div class="bg-gray-50 p-6 rounded-3xl text-left space-y-4 mb-8">
+                <p class="text-gray-600"><i class="fas fa-map-marker-alt mr-2 text-blue-400"></i> <span id="p-location">--</span></p>
+                <p class="text-gray-600"><i class="fas fa-calendar mr-2 text-blue-400"></i> <span id="p-age">--</span> Years Old</p>
+            </div>
+
+            <button onclick="logout()" class="w-full bg-red-50 text-red-500 py-4 rounded-2xl font-bold hover:bg-red-100 transition">লগ আউট</button>
+        </div>
+    </section>
+
+    <section id="profile-setup-section" class="hidden p-6 min-h-screen flex items-center">
+        <div class="bg-white p-8 rounded-[2.5rem] card-shadow w-full max-w-sm mx-auto">
+            <h2 class="text-xl font-bold mb-6 text-gray-800">প্রোফাইল তৈরি করুন 👤</h2>
+            <div class="space-y-4 text-left">
+                <input id="u-name" type="text" placeholder="আপনার নাম" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                <input id="u-age" type="number" placeholder="বয়স" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                <input id="u-location" type="text" placeholder="ঠিকানা (শহর)" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+            </div>
+            <button onclick="saveProfile()" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold mt-8 shadow-lg shadow-green-100 active:scale-95 transition">সেভ করুন</button>
+        </div>
+    </section>
+
+    <script>
+        const ADMIN_PASSWORD = "123"; 
+
+        // Books Data
+        const books = [
+            { id: 1, name: "C Programming", tag: "Coding", icon: "fa-code", color: "orange" },
+            { id: 2, name: "Higher Math", tag: "Science", icon: "fa-square-root-variable", color: "purple" },
+            { id: 3, name: "Physics Part 1", tag: "Science", icon: "fa-atom", color: "blue" },
+            { id: 4, name: "English Grammar", tag: "Language", icon: "fa-font", color: "green" },
+            { id: 5, name: "ICT Book", tag: "Tech", icon: "fa-laptop-code", color: "indigo" },
+            { id: 6, name: "Chemistry Guide", tag: "Science", icon: "fa-flask", color: "red" }
+        ];
+
+        let notices = JSON.parse(localStorage.getItem('appNotices')) || [
+            { id: 1, title: "স্বাগতম! আমাদের অ্যাপে নতুন বই যুক্ত হয়েছে।", date: "আজ" }
+        ];
+
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        // --- SEARCH & BOOKS ---
+        function renderBooks(list) {
+            const grid = document.getElementById('book-grid');
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 text-center py-10 text-gray-400 italic">কোনো বই পাওয়া যায়নি!</div>`;
+                return;
+            }
+            grid.innerHTML = list.map(b => `
+                <div class="bg-white p-5 rounded-[2rem] card-shadow border border-gray-50 text-center animate-in">
+                    <div class="bg-${b.color}-100 text-${b.color}-500 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-3 mx-auto shadow-inner">
+                        <i class="fas ${b.icon}"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-700 text-sm mb-1">${b.name}</h4>
+                    <span class="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">${b.tag}</span>
+                    <button onclick="alert('Opening PDF: ${b.name}')" class="w-full mt-4 bg-blue-50 text-blue-600 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition">PDF পড়ুন</button>
+                </div>
+            `).join('');
+        }
+
+        function searchBooks() {
+            const query = document.getElementById('book-search').value.toLowerCase();
+            const filtered = books.filter(b => b.name.toLowerCase().includes(query) || b.tag.toLowerCase().includes(query));
+            renderBooks(filtered);
+        }
+
+        // --- LOGIN & PROFILE ---
+        function handleLogin() {
+            const phone = document.getElementById('login-phone').value;
+            if (phone.length < 10) return alert("সঠিক ফোন নম্বর দিন!");
+            localStorage.setItem('userPhone', phone);
+            if (localStorage.getItem('userData')) loadHome();
+            else showSection('profile-setup-section');
+        }
+
+        function saveProfile() {
+            const data = {
+                name: document.getElementById('u-name').value,
+                age: document.getElementById('u-age').value,
+                location: document.getElementById('u-location').value,
+                phone: localStorage.getItem('userPhone')
+            };
+            if (!data.name || !data.age) return alert("সব তথ্য দিন!");
+            localStorage.setItem('userData', JSON.stringify(data));
+            loadHome();
+        }
+
+        function loadHome() {
+            const user = JSON.parse(localStorage.getItem('userData'));
+            document.getElementById('display-name').innerText = user.name;
+            document.getElementById('p-name').innerText = user.name;
+            document.getElementById('p-phone').innerText = user.phone;
+            document.getElementById('p-age').innerText = user.age;
+            document.getElementById('p-location').innerText = user.location;
+            document.getElementById('profile-initial').innerText = user.name[0].toUpperCase();
+            
+            renderNotices();
+            renderBooks(books);
+            showSection('home-page');
+        }
+
+        function renderNotices() {
+            const list = document.getElementById('notice-list');
+            list.innerHTML = notices.map(n => `
+                <div class="min-w-[220px] bg-white p-5 rounded-[2rem] border-t-4 border-blue-600 shadow-sm animate-in">
+                    <p class="text-sm font-bold text-gray-800 leading-snug mb-3">${n.title}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-bold">${n.date}</span>
+                        <i class="fas fa-bullhorn text-blue-100"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- ADMIN ---
+        function showAdminLogin() { showSection('admin-login'); }
+
+        function checkAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === ADMIN_PASSWORD) loadAdminDashboard();
+            else alert("ভুল পাসওয়ার্ড!");
+        }
+
+        function loadAdminDashboard() {
+            showSection('admin-dashboard');
+            const manager = document.getElementById('admin-notice-manager');
+            manager.innerHTML = notices.map(n => `
+                <div class="flex justify-between items-center bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 animate-in">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">${n.title}</p>
+                        <span class="text-[10px] text-blue-500">${n.date}</span>
+                    </div>
+                    <button onclick="deleteNotice(${n.id})" class="bg-red-50 text-red-400 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addNotice() {
+            const text = document.getElementById('new-notice-text').value;
+            if (!text) return;
+            notices.unshift({ id: Date.now(), title: text, date: "আজ" });
+            localStorage.setItem('appNotices', JSON.stringify(notices));
+            document.getElementById('new-notice-text').value = "";
+            loadAdminDashboard();
+            alert("নোটিশ যোগ করা হয়েছে!");
+        }
+
+        function deleteNotice(id) {
+            if (confirm("এটি ডিলিট করতে চান?")) {
+                notices = notices.filter(n => n.id !== id);
+                localStorage.setItem('appNotices', JSON.stringify(notices));
+                loadAdminDashboard();
+            }
+        }
+
+        function logout() { if(confirm("লগ আউট করতে চান?")) { localStorage.clear(); location.reload(); } }
+
+        window.onload = () => { if (localStorage.getItem('userData')) loadHome(); };
+    </script>
+</body>
+</html>
