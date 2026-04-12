@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart App Pro - v2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap');
+        body { font-family: 'Hind Siliguri', sans-serif; transition: all 0.3s; }
+        .hidden { display: none; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        #update-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; items-center: center; justify-content: center; backdrop-filter: blur(5px); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="update-overlay" class="hidden p-6">
+        <div class="bg-white p-8 rounded-[2.5rem] text-center max-w-sm">
+            <div class="text-blue-600 text-5xl mb-4"><i class="fas fa-cloud-download-alt"></i></div>
+            <h2 class="text-xl font-bold mb-2">নতুন আপডেট উপলব্ধ!</h2>
+            <p class="text-gray-500 text-sm mb-6">অ্যাপের নতুন ভার্সনটি ব্যবহার করতে নিচের বাটনে ক্লিক করুন।</p>
+            <button onclick="location.reload(true)" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold">এখনই আপডেট করুন</button>
+        </div>
+    </div>
+
+    <section id="login-section" class="flex flex-col items-center justify-center p-6 min-h-screen">
+        <div class="bg-white p-8 rounded-[2.5rem] card-shadow w-full max-w-sm text-center">
+            <h1 class="text-2xl font-bold mb-6">OTP লগইন</h1>
+            <div id="phone-box">
+                <input id="login-phone" type="tel" placeholder="+88017XXXXXXXX" class="w-full p-4 bg-gray-50 border rounded-2xl mb-4 outline-none">
+                <div id="recaptcha-container"></div>
+                <button onclick="sendOTP()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-2">OTP পাঠান</button>
+            </div>
+            <div id="otp-box" class="hidden">
+                <input id="login-otp" type="number" placeholder="######" class="w-full p-4 bg-gray-50 border rounded-2xl mb-4 text-center tracking-widest font-bold">
+                <button onclick="verifyOTP()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-bold">ভেরিফাই করুন</button>
+            </div>
+            <button onclick="showAdminLogin()" class="mt-8 text-gray-300 text-[10px] uppercase">Admin Access</button>
+        </div>
+    </section>
+
+    <section id="home-page" class="hidden min-h-screen pb-20">
+        <div class="bg-blue-600 p-6 pt-10 text-white rounded-b-[3rem] shadow-lg flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div id="home-profile-img"></div>
+                <div>
+                    <p class="text-[10px] opacity-70">ভার্সন: <span id="current-v">2.0</span></p>
+                    <h2 id="display-name" class="text-lg font-bold">User</h2>
+                </div>
+            </div>
+            <button onclick="showSection('profile-view')" class="bg-white/20 p-3 rounded-2xl"><i class="fas fa-user-circle"></i></button>
+        </div>
+
+        <div class="p-6">
+            <h3 class="font-bold text-gray-700 mb-4">নোটিশ বোর্ড</h3>
+            <div id="notice-list" class="space-y-4">
+                </div>
+        </div>
+    </section>
+
+    <section id="profile-view" class="hidden p-6 min-h-screen">
+        <button onclick="showSection('home-page')" class="mb-6 text-gray-500"><i class="fas fa-arrow-left"></i> ফিরে যান</button>
+        <div class="bg-white p-8 rounded-[3rem] card-shadow text-center">
+            <div class="relative w-24 h-24 mx-auto mb-6">
+                <div id="profile-pic-container"></div>
+                <label for="img-upload" class="absolute bottom-0 right-0 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center border-2 border-white cursor-pointer">
+                    <i class="fas fa-camera text-xs"></i>
+                </label>
+                <input type="file" id="img-upload" class="hidden" onchange="handleImageUpload(event)">
+            </div>
+            <h2 id="p-name" class="text-xl font-bold mb-8">--</h2>
+            <button onclick="logout()" class="text-red-500 font-bold">Log Out</button>
+        </div>
+    </section>
+
+    <section id="admin-dashboard" class="hidden p-6 min-h-screen bg-gray-50">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="font-bold">অ্যাডমিন প্যানেল</h2>
+            <button onclick="location.reload()" class="text-red-500">Exit</button>
+        </div>
+        
+        <div class="bg-white p-5 rounded-3xl mb-6 shadow-sm border">
+            <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">App Version Control</h3>
+            <div class="flex gap-2">
+                <input id="new-version" type="text" placeholder="e.g. 2.1" class="flex-1 p-3 bg-gray-50 border rounded-xl outline-none">
+                <button onclick="updateAppVersion()" class="bg-orange-500 text-white px-6 rounded-xl font-bold">Update</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl mb-6 shadow-sm border">
+            <textarea id="adm-notice" placeholder="নতুন নোটিশ লিখুন..." class="w-full p-3 bg-gray-50 border rounded-xl mb-3 h-24 outline-none"></textarea>
+            <button onclick="postNotice()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Post Now</button>
+        </div>
+    </section>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        // --- আপনার Firebase Config এখানে বসান ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const APP_VERSION = "2.0"; // এই ফাইলের বর্তমান ভার্সন
+        let confirmationResult;
+
+        // 1. Force Update Check
+        onSnapshot(doc(db, "settings", "app_config"), (doc) => {
+            if (doc.exists() && doc.data().version !== APP_VERSION) {
+                document.getElementById('update-overlay').classList.remove('hidden');
+            }
+        });
+
+        // 2. Auth Logic (OTP)
+        window.sendOTP = function() {
+            const phone = document.getElementById('login-phone').value;
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+            signInWithPhoneNumber(auth, phone, window.recaptchaVerifier).then((res) => {
+                confirmationResult = res;
+                document.getElementById('phone-box').classList.add('hidden');
+                document.getElementById('otp-box').classList.remove('hidden');
+            }).catch(err => alert(err.message));
+        };
+
+        window.verifyOTP = function() {
+            const code = document.getElementById('login-otp').value;
+            confirmationResult.confirm(code).then(async (res) => {
+                const userDoc = await getDoc(doc(db, "users", res.user.uid));
+                if(!userDoc.exists()) {
+                    await setDoc(doc(db, "users", res.user.uid), { name: "স্মার্ট ইউজার", photo: "" });
+                }
+                loadHome();
+            }).catch(() => alert("ভুল কোড!"));
+        };
+
+        // 3. Image Upload to Storage
+        window.handleImageUpload = async function(e) {
+            const file = e.target.files[0];
+            const uid = auth.currentUser.uid;
+            if(!file) return;
+
+            const fileRef = ref(storage, `profiles/${uid}`);
+            await uploadBytes(fileRef, file);
+            const url = await getDownloadURL(fileRef);
+            await setDoc(doc(db, "users", uid), { photo: url }, { merge: true });
+            renderProfile(url);
+        };
+
+        // 4. Load Home & Notices
+        async function loadHome() {
+            const user = auth.currentUser;
+            const userSnap = await getDoc(doc(db, "users", user.uid));
+            const userData = userSnap.data();
+            
+            document.getElementById('display-name').innerText = userData.name;
+            document.getElementById('p-name').innerText = userData.name;
+            renderProfile(userData.photo);
+            showSection('home-page');
+        }
+
+        function renderProfile(url) {
+            const html = url ? `<img src="${url}" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md">` : `<div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-3xl"><i class="fas fa-user"></i></div>`;
+            document.getElementById('profile-pic-container').innerHTML = html;
+            document.getElementById('home-profile-img').innerHTML = url ? `<img src="${url}" class="w-10 h-10 rounded-xl object-cover border border-white/50">` : `<i class="fas fa-user-circle text-2xl"></i>`;
+        }
+
+        // Real-time Notices
+        const q = query(collection(db, "notices"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const list = document.getElementById('notice-list');
+            list.innerHTML = "";
+            snapshot.forEach(doc => {
+                const n = doc.data();
+                list.innerHTML += `<div class="bg-white p-5 rounded-3xl card-shadow border-l-4 border-blue-600">
+                    <p class="font-bold text-gray-700 mb-2">${n.text}</p>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase">${n.date}</span>
+                </div>`;
+            });
+        });
+
+        // 5. Admin Actions
+        window.updateAppVersion = async function() {
+            const v = document.getElementById('new-version').value;
+            await setDoc(doc(db, "settings", "app_config"), { version: v });
+            alert("সব ইউজারের জন্য নতুন ভার্সন পুশ করা হয়েছে!");
+        };
+
+        window.postNotice = async function() {
+            const t = document.getElementById('adm-notice').value;
+            await addDoc(collection(db, "notices"), {
+                text: t,
+                timestamp: Date.now(),
+                date: new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short'})
+            });
+            document.getElementById('adm-notice').value = "";
+        };
+
+        window.logout = () => signOut(auth).then(() => location.reload());
+        onAuthStateChanged(auth, (user) => { if(user) loadHome(); else showSection('login-section'); });
+
+    </script>
+
+    <script>
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function showAdminLogin() {
+            const pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
+            if(pass === "123") showSection('admin-dashboard');
+        }
+    </script>
+</body>
+</html>
