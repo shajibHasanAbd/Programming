@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Study App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap');
+        body { font-family: 'Hind Siliguri', sans-serif; }
+        .hidden { display: none; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <section id="login-section" class="flex flex-col items-center justify-center p-6 min-h-screen">
+        <div class="bg-white p-8 rounded-[2rem] card-shadow w-full max-w-sm text-center">
+            <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600 text-3xl">
+                <i class="fas fa-mobile-screen-button"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">লগইন করুন</h1>
+            <input id="login-phone" type="tel" placeholder="017XXXXXXXX" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-4 outline-none">
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold">লগইন</button>
+        </div>
+    </section>
+
+    <section id="profile-setup-section" class="hidden flex flex-col items-center p-6 min-h-screen">
+        <div class="bg-white p-8 rounded-[2rem] card-shadow w-full max-w-sm">
+            <h2 class="text-xl font-bold mb-6 text-center">আপনার তথ্য দিন 👤</h2>
+            <div class="space-y-4">
+                <input id="u-name" type="text" placeholder="পূর্ণ নাম" class="w-full p-4 bg-gray-50 border rounded-xl outline-none">
+                <input id="u-age" type="number" placeholder="বয়স" class="w-full p-4 bg-gray-50 border rounded-xl outline-none">
+                <select id="u-gender" class="w-full p-4 bg-gray-50 border rounded-xl outline-none">
+                    <option value="">লিঙ্গ নির্বাচন করুন</option>
+                    <option value="Male">পুরুষ</option>
+                    <option value="Female">মহিলা</option>
+                </select>
+                <input id="u-location" type="text" placeholder="ঠিকানা" class="w-full p-4 bg-gray-50 border rounded-xl outline-none">
+            </div>
+            <button onclick="saveProfile()" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold mt-8">সেভ করুন</button>
+        </div>
+    </section>
+
+    <section id="home-page" class="hidden min-h-screen pb-24">
+        <div class="bg-blue-600 p-6 pt-10 text-white rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
+            <div class="relative z-10 flex justify-between items-center">
+                <div>
+                    <p class="text-blue-100 text-sm">স্বাগতম,</p>
+                    <h2 id="display-name" class="text-2xl font-bold italic">User</h2>
+                </div>
+                <button onclick="showSection('profile-view')" class="bg-white/20 backdrop-blur-md p-3 rounded-2xl">
+                    <i class="fas fa-user-circle text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="px-6 mt-8">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">নোটিশ বোর্ড 📢</h3>
+            <div id="notice-list" class="flex space-x-4 overflow-x-auto pb-4 no-scrollbar"></div>
+        </div>
+
+        <div class="px-6 mt-6">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+                </div>
+                <input type="text" id="book-search" onkeyup="searchBooks()" placeholder="বইয়ের নাম দিয়ে সার্চ করুন..." 
+                    class="w-full pl-12 pr-4 py-4 bg-white border-none rounded-3xl card-shadow outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+            </div>
+        </div>
+
+        <div class="px-6 mt-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">আপনার বইসমূহ 📚</h3>
+            <div id="book-grid" class="grid grid-cols-2 gap-4">
+                </div>
+        </div>
+    </section>
+
+    <section id="profile-view" class="hidden p-6 min-h-screen bg-white">
+        <button onclick="showSection('home-page')" class="bg-gray-100 p-3 rounded-2xl mb-6"><i class="fas fa-arrow-left"></i></button>
+        <div class="text-center">
+            <h2 id="p-name" class="text-2xl font-bold text-gray-800">--</h2>
+            <p id="p-phone" class="text-blue-500 mb-8">--</p>
+            <div class="bg-gray-50 rounded-3xl p-6 text-left space-y-4">
+                <p><strong>Age:</strong> <span id="p-age">--</span></p>
+                <p><strong>Gender:</strong> <span id="p-gender">--</span></p>
+                <p><strong>Location:</strong> <span id="p-location">--</span></p>
+            </div>
+            <button onclick="logout()" class="mt-12 w-full bg-red-50 text-red-500 py-4 rounded-2xl font-bold">লগ আউট</button>
+        </div>
+    </section>
+
+    <script>
+        // বইয়ের তালিকা (Data list for search)
+        const books = [
+            { id: 1, name: "C Programming", tag: "Coding", icon: "fa-code", color: "orange" },
+            { id: 2, name: "Higher Math", tag: "Science", icon: "fa-square-root-variable", color: "purple" },
+            { id: 3, name: "Physics Guide", tag: "Science", icon: "fa-atom", color: "blue" },
+            { id: 4, name: "English Grammar", tag: "Language", icon: "fa-font", color: "green" }
+        ];
+
+        const notices = [
+            { id: 1, title: "আগামীকাল ক্লাস বন্ধ থাকবে", date: "২৪ অক্টোবর" },
+            { id: 2, title: "পরীক্ষার রুটিন প্রকাশিত হয়েছে", date: "২৫ অক্টোবর" }
+        ];
+
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        // --- SEARCH LOGIC ---
+        function searchBooks() {
+            const query = document.getElementById('book-search').value.toLowerCase();
+            const filteredBooks = books.filter(book => book.name.toLowerCase().includes(query));
+            renderBooks(filteredBooks);
+        }
+
+        function renderBooks(bookList) {
+            const grid = document.getElementById('book-grid');
+            if(bookList.length === 0) {
+                grid.innerHTML = `<p class="col-span-2 text-center text-gray-400 py-10 italic text-sm">দুঃখিত, কোনো বই পাওয়া যায়নি!</p>`;
+                return;
+            }
+            grid.innerHTML = bookList.map(book => `
+                <div class="bg-white p-5 rounded-3xl card-shadow border border-gray-50 text-center flex flex-col items-center animate-fade-in">
+                    <div class="bg-${book.color}-100 text-${book.color}-500 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-3">
+                        <i class="fas ${book.icon}"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-700 text-sm">${book.name}</h4>
+                    <p class="text-[10px] text-gray-400 mb-3 uppercase font-semibold">${book.tag}</p>
+                    <button onclick="alert('PDF Opening...')" class="text-xs bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-bold">PDF খুলুন</button>
+                </div>
+            `).join('');
+        }
+
+        // --- LOGIN & PROFILE LOGIC ---
+        function handleLogin() {
+            const phone = document.getElementById('login-phone').value;
+            if (phone.length < 10) return alert("সঠিক ফোন নম্বর দিন");
+            localStorage.setItem('userPhone', phone);
+            const savedData = localStorage.getItem('userData');
+            if (savedData) loadHome();
+            else showSection('profile-setup-section');
+        }
+
+        function saveProfile() {
+            const data = {
+                name: document.getElementById('u-name').value,
+                age: document.getElementById('u-age').value,
+                gender: document.getElementById('u-gender').value,
+                location: document.getElementById('u-location').value,
+                phone: localStorage.getItem('userPhone')
+            };
+            if (!data.name || !data.age) return alert("সব তথ্য পূরণ করুন");
+            localStorage.setItem('userData', JSON.stringify(data));
+            loadHome();
+        }
+
+        function loadHome() {
+            const user = JSON.parse(localStorage.getItem('userData'));
+            document.getElementById('display-name').innerText = user.name;
+            
+            // Profile display updates
+            document.getElementById('p-name').innerText = user.name;
+            document.getElementById('p-phone').innerText = user.phone;
+            document.getElementById('p-age').innerText = user.age;
+            document.getElementById('p-gender').innerText = user.gender;
+            document.getElementById('p-location').innerText = user.location;
+
+            // Notice load
+            const noticeContainer = document.getElementById('notice-list');
+            noticeContainer.innerHTML = notices.map(n => `
+                <div class="min-w-[250px] bg-white p-5 rounded-[2rem] card-shadow border-t-4 border-blue-500">
+                    <p class="text-gray-800 font-bold text-sm mb-2">${n.title}</p>
+                    <span class="text-[10px] bg-gray-100 text-gray-400 px-3 py-1 rounded-full">${n.date}</span>
+                </div>
+            `).join('');
+
+            renderBooks(books); // Initial load of all books
+            showSection('home-page');
+        }
+
+        function logout() {
+            if(confirm("লগ আউট করতে চান?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        window.onload = () => {
+            if (localStorage.getItem('userData')) loadHome();
+        };
+    </script>
+</body>
+</html>
