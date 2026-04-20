@@ -1,0 +1,135 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+// ইমপোর্টগুলো নিশ্চিত করো
+import 'admin_report_form.dart';
+import 'admin_alerts_form.dart';
+import 'admin_book_form.dart'; // নতুন ফাইল
+import 'admin_chapter_form.dart'; // নতুন ফাইল
+
+class AdminDashboard extends StatefulWidget {
+  const AdminDashboard({super.key});
+
+  @override
+  State<AdminDashboard> createState() => _AdminDashboardState();
+}
+
+class _AdminDashboardState extends State<AdminDashboard> {
+  final _titleController = TextEditingController();
+  final _bodyController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _uploadNotice() async {
+    if (_titleController.text.isEmpty || _bodyController.text.isEmpty) return;
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseFirestore.instance.collection('notices').add({
+        'title': _titleController.text.trim(),
+        'body': _bodyController.text.trim(),
+        'date': DateFormat('dd MMM yyyy').format(DateTime.now()),
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      _titleController.clear();
+      _bodyController.clear();
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Notice Published Successfully!")),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      debugPrint("Error: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Admin Control Panel"),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Add New Notice", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 15),
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: "Title", border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: _bodyController,
+              maxLines: 3,
+              decoration: const InputDecoration(labelText: "Message Body", border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+                onPressed: _isLoading ? null : _uploadNotice,
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Publish Now", style: TextStyle(color: Colors.white, fontSize: 16)),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+            const Divider(),
+            const Text("Book Management", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+
+            // বই আপলোড বাটন
+            _buildAdminTile(Icons.library_add_rounded, "Add New Book", Colors.blueAccent, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminBookForm()));
+            }),
+
+            // চ্যাপ্টার আপলোড বাটন
+            _buildAdminTile(Icons.post_add_rounded, "Add Book Chapters", Colors.orange, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminChapterForm()));
+            }),
+
+            const SizedBox(height: 20),
+            const Divider(),
+            const Text("Other Controls", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+
+            _buildAdminTile(Icons.analytics_outlined, "Add Class Report", Colors.green, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminReportForm()));
+            }),
+
+            _buildAdminTile(Icons.warning_amber_rounded, "Send Urgent Alert", Colors.red, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminAlertsForm()));
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdminTile(IconData icon, String title, Color color, VoidCallback onTap) {
+    return Card(
+      elevation: 0,
+      color: color.withOpacity(0.1),
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        leading: Icon(icon, color: color),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap,
+      ),
+    );
+  }
+}
